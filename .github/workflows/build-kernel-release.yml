@@ -13,7 +13,6 @@ jobs:
     secrets: inherit
     with:
       codename: "gs201"
-      repo: "android_kernel_google_gs201"
       android_version: "android14"
       kernel_version: "6.1"
       
@@ -22,7 +21,6 @@ jobs:
     secrets: inherit
     with:
       codename: "zuma"
-      repo: "android_kernel_google_zuma"
       android_version: "android14"
       kernel_version: "6.1"
 
@@ -31,7 +29,6 @@ jobs:
     secrets: inherit
     with:
       codename: "zumapro"
-      repo: "android_kernel_google_zumapro"
       android_version: "android14"
       kernel_version: "6.1"
 
@@ -49,8 +46,16 @@ jobs:
       RELEASE_NOTES: |
         This release contains KernelSU Next and SUSFS v2.0.0
         
+        ### 📦 Variants Included:
+        * **stock**: The pure, unmodified base Sultan kernel. Built straight from source with no extra patches or additions.
+        * **wksu**: Includes Wild KernelSU (WKSU) integrated into the kernel. No other modifications.
+        * **wksu-susfs**: The ultimate package. Includes Wild KernelSU, SUSFS v2.0.0, and extra custom configurations (Mountify support, networking tweaks, BBR TCP congestion, and IPSet support).
+        
         ⚠️ **COMPATIBILITY NOTICE** ⚠️
         Please ensure compatibility!
+        
+        **Sultan Commits Used:**
+        -> https://github.com/kerneltoast/android_kernel_google_tensynos/commit/TENSYNOS_HASH
         
         Module: 
         -> https://github.com/sidex15/ksu_module_susfs
@@ -95,6 +100,18 @@ jobs:
         with:
           path: ./downloaded-artifacts
 
+      - name: Fetch and Inject Sultan Commits
+        run: |
+          TENSYNOS_COMMIT=$(git ls-remote https://github.com/kerneltoast/android_kernel_google_tensynos HEAD | awk '{print $1}')
+          
+          # Replace placeholders in RELEASE_NOTES
+          UPDATED_NOTES="${RELEASE_NOTES//TENSYNOS_HASH/$TENSYNOS_COMMIT}"
+          
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "RELEASE_NOTES<<$EOF" >> $GITHUB_ENV
+          echo "$UPDATED_NOTES" >> $GITHUB_ENV
+          echo "$EOF" >> $GITHUB_ENV
+
       # Create GitHub Release and upload files if make_release is true
       - name: Create GitHub Release
         uses: actions/create-release@v1
@@ -114,9 +131,19 @@ jobs:
                   continue
               fi
 
-              # Upload the file to the GitHub release
-              echo "Uploading $file..."
-              gh release upload ${{ env.NEW_TAG }} "$file"
+              # Extract directory, filename, and extension
+              dir=$(dirname "$file")
+              filename=$(basename "$file")
+              name="${filename%.*}"
+              ext="${filename##*.}"
+              
+              # Append the release tag version to the filename
+              new_filepath="$dir/${name}-${{ env.NEW_TAG }}.${ext}"
+              mv "$file" "$new_filepath"
+
+              # Upload the renamed file to the GitHub release
+              echo "Uploading $new_filepath..."
+              gh release upload ${{ env.NEW_TAG }} "$new_filepath"
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
