@@ -71,6 +71,8 @@ jobs:
           git clone https://github.com/kerneltoast/android_kernel_google_tensynos --depth=1
           SUSFS_BRANCH="gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}"
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
+          cd susfs4ksu
+          git checkout e1c57040136760a57969fc6b1378cc936a257561
 
       - name: Add KernelSU
         if: contains(matrix.features, 'wksu')
@@ -79,7 +81,7 @@ jobs:
           cd "$CONFIG"
 
           echo "Adding KernelSU..."
-          curl -LSs "https://raw.githubusercontent.com/WildKernels/Wild_KSU/stable/kernel/setup.sh" | bash -s canary
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/dev/kernel/setup.sh" | bash -s 2887ea49428bc3fb5184e7c35223f0a9a47ad100
 
       - name: Apply SUSFS Patches
         if: contains(matrix.features, 'susfs')
