@@ -169,7 +169,7 @@ jobs:
         shell: bash
         run: |
           cd "$CONFIG"
-          cat >> "$./arch/arm64/configs/${{ inputs.codename }}_defconfig" << 'EOF'
+          cat >> "./arch/arm64/configs/${{ inputs.codename }}_defconfig" << 'EOF'
           CONFIG_TCP_CONG_ADVANCED=y
           CONFIG_TCP_CONG_BBR=y
           CONFIG_TCP_CONG_CUBIC=y
