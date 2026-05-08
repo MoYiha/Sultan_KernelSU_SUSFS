@@ -206,8 +206,13 @@ jobs:
       - name: Clean git state to prevent + suffix
         run: |
           cd "$CONFIG"
+          echo "Configuring git for commit..."
+          git config user.email "build@github.actions"
+          git config user.name "GitHub Actions"
+          
+          echo "Committing changes to remove + suffix from kernel version..."
           git add .
-          git commit -m "Clean state before build"
+          git commit -m "Apply patches and config changes" || true
 
       - name: Build the Kernel
         run: |
