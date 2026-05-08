@@ -99,12 +99,12 @@ jobs:
           cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
 
           perl -0pi -e 's/if \(IS_ERR\(f\) && !libperfmgr_redirect\(&f, dfd, tmp, &op, how\)\) \{/if (IS_ERR(f)) {/g' fs/open.c
-          cat  fs/open.c
+
           # Change to common directory and apply SUSFS patch
           patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
 
           perl -0pi -e 's/if \(IS_ERR\(f\)\) \{/if (IS_ERR(f) && !libperfmgr_redirect(&f, dfd, tmp, &op, how)) {/g' fs/open.c
-          cat fs/open.c
+          
           cp ../kernel_patches/sultan/sys.c_fix.patch ./
           patch -p1 < sys.c_fix.patch
 
@@ -138,7 +138,7 @@ jobs:
           echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./arch/arm64/configs/${{ inputs.codename }}_defconfig
 
       - name: Configure Networking
-        if: matrix.features == 'wksu-susfs'
+        if: false
         run: |
           cd "$CONFIG"
           # Networking Configuration
@@ -149,6 +149,7 @@ jobs:
 
       - name: Add IP SET & IPv6_NAT Support
         shell: bash
+        if: false
         run: |
           cd "$CONFIG"
           cat >> "./arch/arm64/configs/${{ inputs.codename }}_defconfig" << 'EOF'
@@ -178,7 +179,7 @@ jobs:
 
       - name: Apply TCP Congestion Control
         shell: bash
-        if: true
+        if: false
         run: |
           cd "$CONFIG"
           cat >> "./arch/arm64/configs/${{ inputs.codename }}_defconfig" << 'EOF'
