@@ -99,11 +99,12 @@ jobs:
           cp ../susfs4ksu/kernel_patches/include/linux/* ./include/linux/
 
           perl -0pi -e 's/if \(IS_ERR\(f\) && !libperfmgr_redirect\(&f, dfd, tmp, &op, how\)\) \{/if (IS_ERR(f)) {/g' fs/open.c
-
+          cat  fs/open.c
           # Change to common directory and apply SUSFS patch
           patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
 
           perl -0pi -e 's/if \(IS_ERR\(f\)\) \{/if (IS_ERR(f) && !libperfmgr_redirect(&f, dfd, tmp, &op, how)) {/g' fs/open.c
+          cat fs/open.c
           cp ../kernel_patches/sultan/sys.c_fix.patch ./
           patch -p1 < sys.c_fix.patch
 
@@ -177,6 +178,7 @@ jobs:
 
       - name: Apply TCP Congestion Control
         shell: bash
+        if: true
         run: |
           cd "$CONFIG"
           cat >> "./arch/arm64/configs/${{ inputs.codename }}_defconfig" << 'EOF'
@@ -200,6 +202,14 @@ jobs:
 
           echo "Running sed commands..."
           sed -i 's/CONFIG_LOCALVERSION="-Sultan"/CONFIG_LOCALVERSION="-Sultan-Wild"/' ./arch/arm64/configs/${{ inputs.codename }}_defconfig
+
+      - name: Clean git state to prevent + suffix
+        run: |
+          cd "$CONFIG"
+          echo "Cleaning git state to remove + from kernel version..."
+          git update-index --really-refresh || true
+          git clean -fd || true
+          git add -A || true
 
       - name: Build the Kernel
         run: |
