@@ -206,10 +206,8 @@ jobs:
       - name: Clean git state to prevent + suffix
         run: |
           cd "$CONFIG"
-          echo "Cleaning git state to remove + from kernel version..."
-          git update-index --really-refresh || true
-          git clean -fd || true
-          git add -A || true
+          git add .
+          git commit -m "Clean state before build"
 
       - name: Build the Kernel
         run: |
