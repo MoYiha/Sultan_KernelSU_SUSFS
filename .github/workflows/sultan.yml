@@ -72,7 +72,7 @@ jobs:
           SUSFS_BRANCH="gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}"
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
           cd susfs4ksu
-          git checkout e1c57040136760a57969fc6b1378cc936a257561
+          git checkout ef16cbce5c5195988b9b630de85466148cbbcdef
 
       - name: Add KernelSU
         if: contains(matrix.features, 'wksu')
@@ -81,7 +81,7 @@ jobs:
           cd "$CONFIG"
 
           echo "Adding KernelSU..."
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/dev/kernel/setup.sh" | bash -s 2887ea49428bc3fb5184e7c35223f0a9a47ad100
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/dev/kernel/setup.sh" | bash -s 293ca016cf7196c2e96403a929ea3f464fd3568b
 
       - name: Apply SUSFS Patches
         if: contains(matrix.features, 'susfs')
@@ -109,8 +109,8 @@ jobs:
           patch -p1 < sys.c_fix.patch
 
           cd KernelSU-Next
-          cp ${{ github.workspace }}/kernel_patches/wild/ksun-e6ba52b-susfs-v2.1.0-a14-6.1-e1c57040.patch ./
-          patch -p1 < ksun-e6ba52b-susfs-v2.1.0-a14-6.1-e1c57040.patch
+          cp ${{ github.workspace }}/kernel_patches/wild/ksun-293ca01-susfs-v2.1.0-a14-6.1-ef16cbce.patch ./
+          patch -p1 < ksun-293ca01-susfs-v2.1.0-a14-6.1-ef16cbce.patch
 
       - name: Configure KernelSU
         if: contains(matrix.features, 'wksu')
